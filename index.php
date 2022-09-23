@@ -12,6 +12,7 @@ require 'koneksi.php';
 
   <link rel="stylesheet" href="assets/css/main/app.css" />
   <link rel="stylesheet" href="assets/css/main/app-dark.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css">
   <link rel="shortcut icon" href="assets/images/logo/favicon.svg" type="image/x-icon" />
   <link rel="shortcut icon" href="assets/images/logo/favicon.png" type="image/png" />
 </head>
@@ -112,6 +113,7 @@ require 'koneksi.php';
                         </thead>
                       </tr>
                       <tbody>
+                        <!-- Tampil data -->
                         <?php
                         $sql = mysqli_query($koneksi, "SELECT * FROM tb_pengguna");
                         //jika query diatas menghasilkan nilai > 0 maka menjalankan script di bawah if...
@@ -147,14 +149,34 @@ require 'koneksi.php';
                         ?>
                       </tbody>
                     </table>
-
                   </div>
                 </div>
               </div>
             </div>
         </section>
+        <!-- Button Trigger Modal -->
+        <button type="button" class="btn btn-info btn-lg" data-bs-toggle="modal" data-bs-target="#myModal">Tambah Laporan</button>
+      </div>
+      <!-- Modal -->
+      <div id="myModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Tambah Laporan</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>Modal body text goes here.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+              <button type="button" class="btn btn-primary">Tambahkan</button>
+            </div>
+          </div>
+        </div>
       </div>
 
+      <!-- Footer -->
       <footer>
         <div class="footer clearfix mb-0 text-muted">
           <div class="float-start">
