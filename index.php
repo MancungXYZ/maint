@@ -1,5 +1,12 @@
 <?php
+session_start();
 require 'koneksi.php';
+
+if (!isset($_SESSION['loggedin'])) {
+  echo '<script type="text/javascript">alert("Anda belum melakukan login")</script>';
+  header("Location: login.php");
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -12,7 +19,7 @@ require 'koneksi.php';
 
   <link rel="stylesheet" href="assets/css/main/app.css" />
   <link rel="stylesheet" href="assets/css/main/app-dark.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/extensions/sweetalert2/sweetalert2.min.css">
   <link rel="shortcut icon" href="assets/images/logo/favicon.svg" type="image/x-icon" />
   <link rel="shortcut icon" href="assets/images/logo/favicon.png" type="image/png" />
 </head>
@@ -59,6 +66,10 @@ require 'koneksi.php';
                 <i class="bi bi-grid-fill"></i>
                 <span>Dashboard</span>
               </a>
+              <a href="logout.php" class="sidebar-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+              </a>
             </li>
           </ul>
         </div>
@@ -76,7 +87,7 @@ require 'koneksi.php';
           <div class="row">
             <div class="col-12 col-md-6 order-md-1 order-last">
               <h3>Maintenence</h3>
-              <p class="text-subtitle text-muted">Status Teknisi :</p>
+              <p class="text-subtitle text-muted" name="status_pengerjaan"></p>
             </div>
             <div class="col-12 col-md-6 order-md-2 order-first">
               <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
@@ -101,63 +112,71 @@ require 'koneksi.php';
                 </div>
                 <div class="card-body">
                   <div class="row">
-                    <table class="table table-striped table-hover">
-                      <tr>
-                        <thead>
-                          <td>No</td>
-                          <td>Ruangan</td>
-                          <td>Deskripsi</td>
-                          <td>Tanggal Keluhan</td>
-                          <td>Status</td>
-                          <td>Tanggal penanganan</td>
-                        </thead>
-                      </tr>
-                      <tbody>
-                        <!-- Tampil data -->
-                        <?php
-                        $sql = mysqli_query($koneksi, "SELECT * FROM tb_pengguna");
-                        //jika query diatas menghasilkan nilai > 0 maka menjalankan script di bawah if...
-                        if (mysqli_num_rows($sql) > 0) {
-                          //membuat variabel untuk menyimpan nomor urut
-                          //melakukan perulangan while dengan dari dari query
-                          $no = 1;
-                          while ($data = mysqli_fetch_assoc($sql)) {
-                            //menampilkan data perulangan
-                            echo '
+                    <div class="table-responsive">
+                      <table id="tabelSaya" class="table table-striped table-hover">
+                        <tr>
+                          <thead class="text-center">
+                            <td>No</td>
+                            <td>ID</td>
+                            <td>Ruangan</td>
+                            <td>Deskripsi</td>
+                            <td>Tanggal Keluhan</td>
+                            <td>Status</td>
+                            <td>Tanggal penanganan</td>
+                            <td>Aksi</td>
+                          </thead>
+                        </tr>
+                        <tbody class="text-centers">
+                          <!-- Tampil data -->
+                          <?php
+                          $sql = mysqli_query($koneksi, "SELECT * FROM tb_keluhan");
+                          //jika query diatas menghasilkan nilai > 0 maka menjalankan script di bawah if...
+                          if (mysqli_num_rows($sql) > 0) {
+                            //membuat variabel untuk menyimpan nomor urut
+                            //melakukan perulangan while dengan dari dari query
+                            $no = 1;
+                            while ($data = mysqli_fetch_assoc($sql)) {
+                              //menampilkan data perulangan
+                              echo '
 						<tr>
                             <td>' . $no . '</td>
-							<td>' . $data['id_user'] . '</td>
-							<td>' . $data['tipe_user'] . '</td>
-                            <td>' . $data['nama_pengguna'] . '</td>
-                            <td>' . $data['no_hp'] . '</td>
+							<td>' . $data['id_main'] . '</td>
+							<td>' . $data['ruangan'] . '</td>
+                            <td>' . $data['deskripsi_keluhan'] . '</td>
+                            <td>' . $data['tgl_keluhan'] . '</td>
+                            <td>' . $data['status'] . '</td>
+                            <td>' . $data['tgl_penanganan'] . '</td>
                             <td>
-                            <a href="karyawan-edit.php?id_karyawan=' . $data['id_user'] . '" class="badge badge-warning">Edit</a>
-                            <a href="karyawan-delete.php?id_karyawan=' . $data['id_user'] . '" class="badge badge-danger" onclick="return confirm(\'Yakin ingin menghapus data ini?\')">Delete</a>
+                            <button value="' . $data['id_main'] . '" id="editBtn" class="btn btn-primary btnEdit"><i class="fa fa-pencil"></i></a>
+                            <button value="' . $data['id_main'] . '" id="hapusBtn" class="btn btn-danger btnDelete"><i class="fa fa-trash"></i></a>
                             </td>
 						</tr>
 						';
-                            $no++;
-                          }
-                          //jika query menghasilkan nilai 0
-                        } else {
-                          echo '
+                              $no++;
+                            }
+                            //jika query menghasilkan nilai 0
+                          } else {
+                            echo '
 					<tr>
-						<td colspan="6">Tidak ada data.</td>
+						<td colspan="8">Tidak ada data.</td>
 					</tr>
 					';
-                        }
-                        ?>
-                      </tbody>
-                    </table>
+                          }
+                          ?>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
         </section>
+
         <!-- Button Trigger Modal -->
-        <button type="button" class="btn btn-info btn-lg" data-bs-toggle="modal" data-bs-target="#myModal">Tambah Laporan</button>
+        <button type="button" class="btn btn-info btn-lg" data-bs-toggle="modal" data-bs-target="#myModal"><i class="fa-solid fa-plus"></i> Tambah Laporan</button>
       </div>
-      <!-- Modal -->
+
+      <!-- Modal Tambah User-->
       <div id="myModal" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog">
           <div class="modal-content">
@@ -166,15 +185,104 @@ require 'koneksi.php';
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <p>Modal body text goes here.</p>
+              <form id="formInsert" method="POST" role="form">
+                <div id="pesanBerhasil" class="alert alert-primary d-none" role="alert">
+                  DATA BERHASIL DI SIMPAN
+                </div>
+                <div class="mb-3">
+                  <label for="ruangan" class="form-label">Ruangan Terkait</label>
+                  <input type="text" class="form-control" name="ruangan">
+                </div>
+                <div class="mb-3">
+                  <label for="deskripsi" class="form-label">Deskripsi Terkait</label>
+                  <textarea class="form-control" aria-label="With textarea" name="desk"></textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="Tanggal" class="form-label">Tanggal Pengajuan</label>
+                  <input type="date" class="form-control" name="tgl_keluhan">
+                </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-              <button type="button" class="btn btn-primary">Tambahkan</button>
+              <button type="submit" class="btn btn-primary" name="submit">Tambahkan</button>
+              </form>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Modal Edit User-->
+      <div id="editModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Tambah Laporan</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form id="editForm" method="POST" role="form">
+                <div id="pesanBerhasil" class="alert alert-primary d-none" role="alert">
+                  DATA BERHASIL DI SIMPAN
+                </div>
+                <input type="hidden" id="id_main" name="id_main">
+                <div class="mb-3">
+                  <label for="ruangan" class="form-label">Ruangan Terkait</label>
+                  <input type="text" class="form-control" id="ruangan" name="ruangan">
+                </div>
+                <div class="mb-3">
+                  <label for="deskripsi" class="form-label">Deskripsi Terkait</label>
+                  <textarea class="form-control" aria-label="With textarea" id="desk" name="desk"></textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="Tanggal" class="form-label">Tanggal Pengajuan</label>
+                  <input type="date" class="form-control" id="tgl_keluhan" name="tgl_keluhan">
+                </div>
+                <div class="mb-3">
+                  <label for="Status" class="form-label">Status Pengerjaan</label>
+                  <select class="form-select" aria-label="Default select example" id="status" name="status">
+                    <option value="PENDING" selected>Pending</option>
+                    <option value="ON PROGRESS">On Progress</option>
+                    <option value="DONE">Done</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="Tanggal" class="form-label">Tanggal Penanganan</label>
+                  <input type="date" class="form-control" id="tgl_penanganan" name="tgl_penanganan">
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+              <button type="submit" class="btn btn-primary" name="submit">Simpan</button>
+            </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Modal Delete User -->
+      <div class="modal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Konfirmasi Hapus Laporan</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>Apakah anda yakin ingin menghapus laporan dengan ID <?php echo $_GET['id']; ?></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <?php
+
+      ?>
+      <!-- modal delete -->
+
 
       <!-- Footer -->
       <footer>
@@ -193,8 +301,168 @@ require 'koneksi.php';
       </footer>
     </div>
   </div>
+  <script src="https://code.jquery.com/jquery-3.6.1.js"></script>
   <script src="assets/js/bootstrap.js"></script>
   <script src="assets/js/app.js"></script>
+  <script src="assets/extensions/sweetalert2/sweetalert2.min.js"></script>
+  <script src="https://kit.fontawesome.com/3e6170f06f.js" crossorigin="anonymous"></script>
+
+  <script>
+    //ajax tambah data pegawai
+    $(document).on('submit', '#formInsert', function(e) {
+      e.preventDefault();
+
+      var formData = new FormData(this);
+      formData.append("form_insert", true);
+
+      $.ajax({
+        type: "POST",
+        url: "functions.php",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+
+          var res = jQuery.parseJSON(response);
+          if (res.status == 422) {
+            Swal.fire({
+              position: 'top-end',
+              icon: 'error',
+              title: 'Ooops terjadi kesalahan',
+              showConfirmButton: false,
+              timer: 1500
+            })
+          } else if (res.status == 200) {
+            $('#formInsert').modal('hide');
+            Swal.fire({
+              position: 'top-end',
+              icon: 'success',
+              title: 'Data berhasil di simpan',
+              showConfirmButton: false,
+              timer: 1500
+            })
+            $('#formInsert')[0].reset();
+            $('#tabelSaya').load(location.href + " #tabelSaya");
+          }
+        }
+      });
+
+    });
+    //ajax edit data
+    $(document).on('click', '.btnEdit', function() {
+      var id_main = $(this).val();
+
+      $.ajax({
+        type: "GET",
+        url: "functions.php?id_main=" + id_main,
+        success: function(response) {
+          var res = jQuery.parseJSON(response);
+          console.log(res);
+          if (res.status == 404) {
+            alert("404 Not found");
+          } else if (res.status == 200) {
+            $('#id_main').val(res.data.id_main);
+            $('#ruangan').val(res.data.ruangan);
+            $('#desk').val(res.data.deskripsi_keluhan);
+            $('#tgl_keluhan').val(res.data.tgl_keluhan);
+            $('#status').val(res.data.status);
+            $('#tgl_penanganan').val(res.data.tgl_penanganan);
+
+            $('#editModal').modal('show');
+          }
+        }
+      });
+    });
+
+    //update isi ajax
+    $(document).on('submit', '#editForm', function(e) {
+      e.preventDefault();
+
+      var formData = new FormData(this);
+      formData.append("edit_form", true);
+
+      $.ajax({
+        type: "POST",
+        url: "functions.php",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+
+          var res = jQuery.parseJSON(response);
+          if (res.statusCode == 422) {
+            Swal.fire({
+              position: 'top-end',
+              icon: 'error',
+              title: 'Ooops terjadi kesalahan',
+              showConfirmButton: false,
+              timer: 1500
+            })
+          } else if (res.statusCode == 200) {
+            $('#formInsert').modal('hide');
+            Swal.fire({
+              position: 'top-end',
+              icon: 'success',
+              title: 'Data berhasil di simpan',
+              showConfirmButton: false,
+              timer: 1500
+            })
+            $('#tabelSaya').load(location.href + " #tabelSaya");
+          }
+        }
+      });
+
+    });
+
+
+    //ajax hapus data
+    $(document).on('click', '.btnDelete', function() {
+
+      var id_main = $(this).val();
+      $.ajax({
+        type: "POST",
+        url: "functions.php",
+        data: {
+          'delete_laporan': true,
+          'id_main': id_main,
+        },
+        success: function(response) {
+          var res = jQuery.parseJSON(response);
+
+          if (res.status == 422) {
+            Swal.fire({
+              position: 'top-end',
+              icon: 'error',
+              title: 'Ooops terjadi kesalahan',
+              showConfirmButton: false,
+              timer: 1500
+            })
+          } else if (res.status == 200) {
+            Swal.fire({
+              title: 'Apa anda yakin?',
+              text: "Data yang terhapus tidak bisa di kembalikan!",
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#3085d6',
+              cancelButtonColor: '#d33',
+              confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+              if (result.isConfirmed) {
+                $('#tabelSaya').load(location.href + " #tabelSaya");
+                Swal.fire(
+                  'Deleted!',
+                  'Your file has been deleted.',
+                  'success'
+                )
+              }
+            })
+          }
+        }
+      });
+
+
+    });
+  </script>
 </body>
 
 </html>

@@ -94,8 +94,8 @@ require 'koneksi.php';
 
         session_start();
         $_SESSION['loggedin'] = TRUE;
+        $_SESSION['user_id'] = $data['id_user'];
         $_SESSION['nama'] = $data['nama_pengguna'];
-        $_SESSION['alamat'] = $data['alamat'];
         $_SESSION['email'] = $data['email'];
         header("Location: index.php");
       } else {
